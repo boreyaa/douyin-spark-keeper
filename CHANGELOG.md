@@ -2,7 +2,28 @@
 
 本文件记录 douyin-spark-keeper 的版本变更，格式遵循 Keep a Changelog，版本号遵循语义化版本。
 
-## [0.2.0] - 2026-11-03
+## [0.3.0] - 2026-11-03
+
+### 新增
+
+- 独立运行器 `runner/douyin_spark_daily.py`：不依赖宿主应用，自己枚举会话、发送、记当日账，配置外置到 `config/runner.json`。支持 `--headed`、`--dry-run`、`--only`、`--limit`。
+- 外壳脚本 `runner/run_daily.bat`：无头优先，退出码大于等于 2 时自动有头重跑一次。
+- 定时任务独立说明 `docs/scheduling.md`：每小时守卫式调度、系统开机任务、退出码语义、日志排错、三道防重复的闸。
+- 排除名单机制：`config/exclude.json` 里的会话不发也不计失败，示例文件 `config/exclude.example.json`，个人名单不入库。
+- 发送结果校验口径：输入框已清空且会话预览出现 `[比心]`，不再依赖消息气泡数量。
+
+### 变更
+
+- 发送内容默认收敛为一个 `[比心]` 表情，不再使用寒暄模板。
+- 技能定义与定时任务参数卡按实测结论重写：去掉固定时刻调度，改为守卫式；补上无头模式、虚拟滚动遍历、表情面板不可用的结论。
+
+### 修复
+
+- 会话列表为虚拟滚动时只抓首屏会漏大量会话。
+- 消息区同为虚拟列表，条数可能不变，旧的条数校验会把已成功的发送误判为失败。
+
+[0.3.0]: https://github.com/boreyaa/douyin-spark-keeper/releases/tag/v0.3.0
+[0.2.0]: https://github.com/boreyaa/douyin-spark-keeper/releases/tag/v0.2.0
 
 ### 新增
 

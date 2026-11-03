@@ -29,11 +29,11 @@
 | 字段 | 取值 |
 | --- | --- |
 | scheduleType | `recurring` |
-| rrule | `FREQ=DAILY;BYHOUR=21;BYMINUTE=0` |
+| rrule | `FREQ=HOURLY;INTERVAL=1` |
 | status | `ACTIVE` |
 | cwds | 仓库绝对路径 |
 
-提示词原文见 `integrations/workbuddy/AUTOMATION.md`。提示词自包含仓库路径、命令序列与失败即停条件。
+不用固定时刻，是因为那天那个点没开机就漏一天。改成每小时触发，配合守卫判断（先读当日记录，够数就退出、不启动浏览器），当天只真正执行一次，开机后一小时内自动补上。完整原理见 [定时任务说明](scheduling.md)，提示词原文见 `integrations/workbuddy/AUTOMATION.md`。
 
 定时任务一旦启用，就会每天自动向好友发送消息。启用动作由使用者决定，项目不会自动启用它。
 
@@ -42,7 +42,7 @@
 1. 技能运行 `python -m douyin_spark plan` 取今日待发名单。
 2. 技能打开 `https://www.douyin.com/chat?isPopup=1`，按浏览器快照现场定位会话。
 3. 技能把会话列表整理成快照 JSON，运行 `python -m douyin_spark snapshot --file ... --apply` 导入读数。字段规范见 `docs/snapshot-contract.md`，页面改版只需重新生成快照。
-4. 技能对每个会话运行 `python -m douyin_spark next` 取消息并发送，每人每天一条，间隔 1 到 2 秒。发送失败时运行 `fail` 记录原因，当日失败达到阈值后 `plan` 自动熔断。
+4. 技能对每个会话在输入框键入 `[比心]` 并点发送，每人每天一条，间隔 1 到 2 秒。不走表情面板，面板内点击插入不进去；发送后校验输入框已清空且会话预览出现 `[比心]`，不要只看消息气泡数量，虚拟列表下条数可能不变。发送失败时运行 `fail` 记录原因，当日失败达到阈值后 `plan` 自动熔断。
 5. 技能运行 `mark` 记录成功发送，运行 `digest` 生成当日日报。
 6. 技能运行 `report` 汇报结果。任一环节失败时立即停止，不重试、不重复发送。
 

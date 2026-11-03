@@ -1,13 +1,6 @@
 HEART = "[比心]"
 
-DEFAULT_TEMPLATES = [
-    "早呀，今天也冒个泡",
-    "在忙啥呢",
-    "刚刷到一个挺有意思的，等下发你",
-    "晚上记得早点休息",
-    "今天这天气有点意思",
-    "顺手打个卡",
-]
+DEFAULT_TEMPLATES = [HEART]
 
 
 def pick_message(state, templates=None):

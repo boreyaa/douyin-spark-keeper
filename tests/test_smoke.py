@@ -56,9 +56,15 @@ class StateTests(unittest.TestCase):
 
     def test_pick_message_avoids_last_text(self):
         s = st.empty_state()
-        s["last_text"] = messages.DEFAULT_TEMPLATES[0]
+        pool = ["甲话", "乙话"]
+        s["last_text"] = pool[0]
         s["template_index"] = 0
-        self.assertNotEqual(messages.pick_message(s, messages.DEFAULT_TEMPLATES), s["last_text"])
+        self.assertNotEqual(messages.pick_message(s, pool), s["last_text"])
+
+    def test_default_message_is_heart(self):
+        s = st.empty_state()
+        self.assertEqual(messages.DEFAULT_TEMPLATES, [messages.HEART])
+        self.assertEqual(messages.pick_message(s), "[比心]")
 
     def test_update_contact(self):
         s = st.empty_state()

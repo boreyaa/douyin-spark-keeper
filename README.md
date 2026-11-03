@@ -18,7 +18,9 @@
 
 本项目的判断是：页面结构属于平台，不由项目维护。项目只维护一份数据格式，以及围绕这份格式的去重、熔断与归档。
 
-## 三个原创设计
+发送内容上也不跟它们一样。已有方案发的是随机寒暄或固定话术，AI 生成的还会漂移，对方一看就知道不是本人在说话。本项目默认只发一个 `[比心]`：一个表情，不寒暄、不追问、不留话柄，火花续上了，聊天也不被打扰。
+
+## 四个原创设计
 
 ### 1. 快照契约：页面改版不用改代码
 
@@ -63,6 +65,14 @@ python -m douyin_spark status
 python -m douyin_spark digest
 ```
 
+### 4. 守卫式调度：开机后一小时内补上，当天只跑一次
+
+固定时刻的定时任务有个硬伤：那天那个点没开机，当天就漏了，而续火花最怕漏一天。
+
+本项目把调度改成每小时触发一次，每次先做一次极廉价的守卫判断——只读当日记录文件，够数就立刻结束，连浏览器都不启动；不够才真正执行，执行时又会跳过已发过的会话，把剩下的补完。
+
+效果等于「开机后一小时内自动续上」，代价是一次 JSON 读。守卫判据用条数阈值而不是「有记录就跳过」，因为中途中断也会留下记录。原理、参数与两种调度形态（应用内定时 / 系统开机任务）见 [定时任务说明](docs/scheduling.md)。
+
 ## 它怎么跑起来
 
 ```mermaid
@@ -102,9 +112,17 @@ cp config/exclude.example.json config/exclude.json
 
 这份名单是使用者个人数据，已在 `.gitignore` 中，不进版本库，也不随项目分发。
 
-接入 WorkBuddy：把 `integrations/workbuddy/SKILL.md` 复制到 `~/.workbuddy/skills/douyin-spark/SKILL.md`，把文件里的 `PROJECT_ROOT` 替换为仓库绝对路径。每日定时任务的参数与自包含提示词见 `integrations/workbuddy/AUTOMATION.md`。
+接入 WorkBuddy：把 `integrations/workbuddy/SKILL.md` 复制到 `~/.workbuddy/skills/douyin-spark/SKILL.md`，把文件里的 `PROJECT_ROOT` 替换为仓库绝对路径。定时任务的参数与自包含提示词见 [定时任务说明](docs/scheduling.md)。
 
-> ⚠️ 定时任务一旦启用就会每天自动向好友发送消息。首次使用建议先手动跑 `plan` 与 `next`，确认名单和消息无误后再启用。
+不想依赖宿主应用时，直接用独立运行器，配置写在 `config/runner.json`（个人配置，不入库）：
+
+```bash
+cp config/runner.example.json config/runner.json
+python runner/douyin_spark_daily.py --config config/runner.json --dry-run  # 只列名单
+python runner/douyin_spark_daily.py --config config/runner.json            # 无头发送
+```
+
+> ⚠️ 定时任务一旦启用就会每天自动向好友发送消息。首次使用建议先 `--dry-run` 确认名单，再正式启用。
 
 ## 命令一览
 
@@ -132,8 +150,11 @@ douyin-spark-keeper/
 │   ├── state.py           # 状态、快照导入、熔断、日报
 │   ├── snapshot.py        # 快照契约校验
 │   └── messages.py        # 模板轮换
-├── config/                # 配置示例，运行时状态不入库
-├── docs/                  # 快照契约、WorkBuddy 集成、命令参考
+├── runner/                # 独立运行器，不依赖宿主应用
+│   ├── douyin_spark_daily.py  # 枚举会话、发比心、记当日账
+│   └── run_daily.bat          # 无头优先，失败退回有头
+├── config/                # 配置示例，运行时状态与个人名单不入库
+├── docs/                  # 快照契约、页面定位、定时调度、命令参考
 ├── integrations/workbuddy/# 技能定义与定时任务参数
 ├── reports/               # 日报输出，不入库
 ├── tests/                 # 单元测试与端到端冒烟
@@ -149,6 +170,7 @@ douyin-spark-keeper/
 
 - [快照契约](docs/snapshot-contract.md) —— 本项目独有的数据格式与两阶段导入
 - [页面定位契约](docs/page-selectors.md) —— 实测通过的 DOM 定位、虚拟滚动遍历与比心发送路径
+- [定时任务说明](docs/scheduling.md) —— 每小时守卫式调度、开机任务、运行器与退出码、三道防重复的闸
 - [WorkBuddy 集成说明](docs/workbuddy.md) —— 技能安装、定时任务、故障排查
 - [命令参考](docs/commands.md)
 - [更新日志](CHANGELOG.md) · [贡献指南](CONTRIBUTING.md)

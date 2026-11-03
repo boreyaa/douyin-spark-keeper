@@ -1,18 +1,24 @@
-# WorkBuddy 每日定时任务参数
+# WorkBuddy 定时任务参数卡
 
-项目根目录：`PROJECT_ROOT`，启用前请替换为仓库绝对路径。
+完整设计说明见 [定时任务说明](../../docs/scheduling.md)。本文件只给可直接抄的参数。
 
 | 字段 | 取值 |
 | --- | --- |
 | scheduleType | `recurring` |
-| rrule | `FREQ=DAILY;BYHOUR=21;BYMINUTE=0` |
+| rrule | `FREQ=HOURLY;INTERVAL=1` |
 | status | `ACTIVE` |
 | cwds | 仓库绝对路径 |
+
+为什么不是每天 21:00 一次：固定时刻一旦那天没开机就漏一天，续火花最怕漏。改每小时触发，配合下面这段守卫判断，当天只真正执行一次，开机后一小时内自动补上。
 
 提示词原文：
 
 ```
-在 PROJECT_ROOT 项目中执行抖音每日续火花任务。先加载 douyin-spark 技能，运行 python -m douyin_spark plan 取今日待发名单，若返回熔断提示则立即停止。用浏览器控制能力打开抖音网页版聊天页，把会话列表整理成快照 JSON，运行 python -m douyin_spark snapshot --file 快照文件 --apply 导入读数。对名单中每个联系人发送一条由 python -m douyin_spark next 生成的消息，每发一条间隔 1 到 2 秒。发送成功运行 python -m douyin_spark mark 记录，发送失败运行 python -m douyin_spark fail 记录原因。全部完成后运行 python -m douyin_spark digest 生成日报，并运行 python -m douyin_spark report 输出本次结果。若浏览器控制能力不可用、抖音网页版未登录或任一环节失败，立即停止并报告原因，不要重试、不要重复发送。
+先读 <DATA_DIR>/heart_ledger.json，取今天的日期键。如果今天的记录条数已达阈值，直接回复「今日已完成」并结束，不要启动浏览器。
+
+否则执行续火花：加载 douyin-spark 技能，打开 https://www.douyin.com/chat?isPopup=1，复用已登录的浏览器配置目录，用无头模式运行，无头加载为空时退回有头重跑一次。会话列表是虚拟滚动，必须从顶部按 340 像素步进滚到底并去重累加。筛出带火花的会话，读火花天数，「重燃中」也算有火花。跳过 exclude.json 与当日已发记录，逐个在输入框键入 [比心] 并点发送，不走表情面板。校验方式为输入框已清空且会话预览出现 [比心]，不要只看消息气泡数量。每成功一个写当日记录，失败的单独列出并重试一次。最后按表格汇报会话、火花天数、结果与失败原因，会话名称只出现在对话里，不写入任何文件。
 ```
 
-启用前需要确认两项前置条件：WorkBuddy 设置里的浏览器控制能力已开启；本机 Chrome 或 Edge 中抖音网页版已登录。定时任务一旦启用就会每天向外发送消息，启用动作由使用者决定。
+启用前确认三项：WorkBuddy 浏览器控制能力已开启；浏览器配置目录里抖音网页版已登录；`exclude.json` 与 `heart_ledger.json` 所在的数据目录可写。
+
+定时任务一旦启用就会按计划向真实联系人发送消息，启用动作由使用者本人决定。
