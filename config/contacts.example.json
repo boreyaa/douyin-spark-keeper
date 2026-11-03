@@ -1,0 +1,16 @@
+{
+  "contacts": [
+    {
+      "name": "示例好友甲",
+      "spark_days": 93,
+      "status": "彩色",
+      "reignite_progress": ""
+    },
+    {
+      "name": "示例好友乙",
+      "spark_days": 2,
+      "status": "重燃中",
+      "reignite_progress": "2/3"
+    }
+  ]
+}
