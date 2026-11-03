@@ -94,6 +94,14 @@ python -m douyin_spark next --text "[比心]"
 
 只想续火花、不想寒暄时，用 `next --text "[比心]"` 固定发一个比心表情即可。抖音客户端会把 `[比心]` 渲染成表情，会话预览同样显示为 `[比心]`。表情面板那条路走不通，原因写在 [页面定位契约](docs/page-selectors.md) 里。
 
+带火花但不想续的会话（例如某个群聊）写进 `config/exclude.json`，运行时直接跳过，不发也不计入失败：
+
+```bash
+cp config/exclude.example.json config/exclude.json
+```
+
+这份名单是使用者个人数据，已在 `.gitignore` 中，不进版本库，也不随项目分发。
+
 接入 WorkBuddy：把 `integrations/workbuddy/SKILL.md` 复制到 `~/.workbuddy/skills/douyin-spark/SKILL.md`，把文件里的 `PROJECT_ROOT` 替换为仓库绝对路径。每日定时任务的参数与自包含提示词见 `integrations/workbuddy/AUTOMATION.md`。
 
 > ⚠️ 定时任务一旦启用就会每天自动向好友发送消息。首次使用建议先手动跑 `plan` 与 `next`，确认名单和消息无误后再启用。
