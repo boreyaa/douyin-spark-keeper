@@ -19,7 +19,8 @@ def build_parser():
 
     sub.add_parser("list", help="列出联系人清单")
     sub.add_parser("plan", help="列出今日待发联系人")
-    sub.add_parser("next", help="输出本次建议发送的消息")
+    p_next = sub.add_parser("next", help="输出本次建议发送的消息")
+    p_next.add_argument("--text", default="", help="固定发送这一条内容，例如 [比心]")
     sub.add_parser("status", help="显示今日运行状态")
     sub.add_parser("report", help="输出可汇报的发送结果表格")
     sub.add_parser("dump", help="输出完整状态 JSON")
@@ -134,7 +135,11 @@ def main(argv=None):
         changed = True
     elif cmd == "next":
         st.roll_day(state)
-        print(messages.pick_message(state, load_templates(args.templates)))
+        fixed = (getattr(args, "text", "") or "").strip()
+        if fixed:
+            print(fixed)
+        else:
+            print(messages.pick_message(state, load_templates(args.templates)))
         changed = True
     elif cmd == "plan":
         st.roll_day(state)

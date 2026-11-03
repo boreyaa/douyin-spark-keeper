@@ -1,3 +1,5 @@
+HEART = "[比心]"
+
 DEFAULT_TEMPLATES = [
     "早呀，今天也冒个泡",
     "在忙啥呢",

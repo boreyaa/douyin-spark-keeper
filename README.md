@@ -89,7 +89,10 @@ cp config/messages.example.json config/messages.json
 python -m douyin_spark --help
 python -m douyin_spark add "好友昵称" --days 93 --status 彩色
 python -m douyin_spark plan
+python -m douyin_spark next --text "[比心]"
 ```
+
+只想续火花、不想寒暄时，用 `next --text "[比心]"` 固定发一个比心表情即可。抖音客户端会把 `[比心]` 渲染成表情，会话预览同样显示为 `[比心]`。表情面板那条路走不通，原因写在 [页面定位契约](docs/page-selectors.md) 里。
 
 接入 WorkBuddy：把 `integrations/workbuddy/SKILL.md` 复制到 `~/.workbuddy/skills/douyin-spark/SKILL.md`，把文件里的 `PROJECT_ROOT` 替换为仓库绝对路径。每日定时任务的参数与自包含提示词见 `integrations/workbuddy/AUTOMATION.md`。
 
@@ -102,7 +105,7 @@ python -m douyin_spark plan
 | `list` / `add` / `remove` | 联系人清单 |
 | `snapshot --file PATH [--apply]` | 校验并导入会话快照 |
 | `plan` | 今日待发名单，熔断时返回空 |
-| `next` | 取下一条消息，避开上一条内容 |
+| `next [--text TEXT]` | 取下一条消息，避开上一条内容；给 `--text` 则固定发这一条 |
 | `mark NAME --text TEXT` | 记录发送成功 |
 | `fail NAME --reason TEXT` | 记录发送失败，累计触发熔断 |
 | `set NAME --days N --status ...` | 按页面读数更新字段 |
@@ -137,6 +140,7 @@ douyin-spark-keeper/
 ## 文档
 
 - [快照契约](docs/snapshot-contract.md) —— 本项目独有的数据格式与两阶段导入
+- [页面定位契约](docs/page-selectors.md) —— 实测通过的 DOM 定位、虚拟滚动遍历与比心发送路径
 - [WorkBuddy 集成说明](docs/workbuddy.md) —— 技能安装、定时任务、故障排查
 - [命令参考](docs/commands.md)
 - [更新日志](CHANGELOG.md) · [贡献指南](CONTRIBUTING.md)
